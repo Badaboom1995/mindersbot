@@ -37,18 +37,6 @@ module.exports = async (req, res) => {
     }
 };
 
-// const techKeys = skills.tech.reduce((acc, curr) => {
-//     const row = Math.floor(acc.length/3);
-//     if(!acc[row]) acc[row] = [];
-//     acc[row].push(Markup.button.callback(curr, `skill_${curr}`));
-//     return acc;
-// }, []);
-//
-// const businessKeys = skills.business.map((skill, index) => {
-//     return Markup.button.callback(skill, `skill_${skill}`)
-// });
-//write a regex for this skill_${skill}
-
 const saveChatId = async (ctx) => {
     const {error} = await supabase
         .from('Users')
@@ -132,23 +120,7 @@ bot.on('text', async (ctx) => {
             return [...acc, [Markup.button.callback(key, `option_${key}`)]];
         },[]);
         ctx.replyWithHTML(`<b><code> Выберите категорию </code></b>`, Markup.inlineKeyboard(hightCategoryKeyboard,{columns:1}));
-        // reply with inline keyboard of skills
-        for (const [key, value] of Object.entries(hobbies)) {
-            // ctx.replyWithHTML(`<h1>${key}</h1>`)
-            // reply with keyboard and html title
-            // ctx.replyWithHTML(`<b><code>> ${key} </code></b>`, Markup.inlineKeyboard(makeKeyboard(value, 3), {columns: 3}));
-
-        }
-        // ctx.reply('Спорт', Markup.inlineKeyboard(makeKeyboard(hobbies.sport, 3), {columns: 3}));
-        // ctx.reply('Автомобили', Markup.inlineKeyboard(makeKeyboard(hobbies.auto, 3), {columns: 3}));
-        // ctx.reply('Рукоделие', Markup.inlineKeyboard(makeKeyboard(hobbies.diy, 3), {columns: 3}));
-        // ctx.reply('Настольные игры', Markup.inlineKeyboard(makeKeyboard(hobbies.games, 3), {columns: 3}));
-        // ctx.reply('Культура', Markup.inlineKeyboard(makeKeyboard(hobbies.culture, 3), {columns: 3}));
-
-        // ctx.reply('Business skills', Markup.inlineKeyboard(businessKeys));
-
     }
-    // ctx.reply(ctx.message.text);
 });
 
 
@@ -164,5 +136,5 @@ bot.action(/option_(.+)/, async (ctx) => {
 })
 
 
-bot.launch();
-console.log('bot started');
+// bot.launch();
+// console.log('bot started');
