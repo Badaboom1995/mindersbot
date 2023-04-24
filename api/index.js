@@ -1,14 +1,14 @@
 const {Telegraf, Markup, Scenes, session} = require('telegraf');
-const {skills, hobbies}  = require("./data/skills.js");
-const {collectHobbies} = require("./helpers/gpt");
-const {messages} = require("./config");
-const {makeKeyboard} = require("./helpers/keyboard");
-const {editScene} = require("./scenes/editScene");
-const {requestScene} = require("./scenes/requestScene");
-const {profileNormalizeScene} = require("./scenes/profileNormalizeScene");
-const {getUserFormDB, sendProfile} = require("./helpers/getUserFormDB");
-const {sendToAdmins} = require("./helpers/sendToAdmins");
-const {supabase} = require("./supabase");
+const {skills, hobbies}  = require("../data/skills.js");
+const {collectHobbies} = require("../helpers/gpt");
+const {messages} = require("../config");
+const {makeKeyboard} = require("../helpers/keyboard");
+const {editScene} = require("../scenes/editScene");
+const {requestScene} = require("../scenes/requestScene");
+const {profileNormalizeScene} = require("../scenes/profileNormalizeScene");
+const {getUserFormDB, sendProfile} = require("../helpers/getUserFormDB");
+const {sendToAdmins} = require("../helpers/sendToAdmins");
+const {supabase} = require("../supabase");
 const cloudinary = require('cloudinary').v2;
 
 
@@ -25,6 +25,16 @@ const stage = new Scenes.Stage([editScene, requestScene, profileNormalizeScene])
 bot.use(session());
 bot.use(stage.middleware());
 
+module.exports = async (req, res) => {
+    try {
+        await bot.handleUpdate(req.body);
+        res.status(200).end();
+    } catch (error) {
+        console.error(error);
+        res.status(500).end();
+    }
+};
+
 // const techKeys = skills.tech.reduce((acc, curr) => {
 //     const row = Math.floor(acc.length/3);
 //     if(!acc[row]) acc[row] = [];
@@ -36,8 +46,6 @@ bot.use(stage.middleware());
 //     return Markup.button.callback(skill, `skill_${skill}`)
 // });
 //write a regex for this skill_${skill}
-
-collectHobbies()
 
 const saveChatId = async (ctx) => {
     const {error} = await supabase
