@@ -26,7 +26,7 @@ bot.use(session());
 bot.use(stage.middleware());
 
 bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
-console.log('booom')
+
 module.exports = async (req, res) => {
     try {
         await bot.handleUpdate(req.body);
