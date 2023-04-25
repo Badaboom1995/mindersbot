@@ -74,7 +74,7 @@ const profileNormalizeScene = new WizardScene(
                  await ctx.reply('Как тебя зовут?');
                 break;
             case 'profile_photo_url':
-                 await ctx.reply('Не нашел фото, пришли новое');
+                 await ctx.reply('Пришли новое фото для профиля пожалуйста. Нужно отправить через вложение, не ссылкой');
                 break;
             case 'description':
                  await ctx.reply('Напиши в ответ новое описание: пара предложений о твоих профессиональных интересах, взглядах, хобби');

@@ -10,7 +10,7 @@ var weekday = require('dayjs/plugin/weekday')
 
 dayjs.extend(weekOfYear)
 dayjs.extend(weekday)
-const doneMessage = `Готово! Твой профиль и запрос опубликованы. Скоро подберем тебе пару.
+const doneMessage = `⭐️ Готово! Твой профиль и запрос опубликованы. Скоро подберем тебе пару.
 
 Если захочешь изменить профиль или запрос - воспользуйся клавиатурой ниже. Там же ты можешь отменить свое участие на следующей неделе, поменять пару и тд.`
 const checkCorrectAnswer = (ctx, prefix, isText) => {

@@ -75,7 +75,7 @@ bot.action(/isRight_(.+)/, async (ctx) => {
     const optionName = ctx.match[1];
     await ctx.answerCbQuery(); // Required to close the loading state on the button
     if(optionName === 'Да, мой') {
-        await ctx.reply(`Супер, нужно заполнить еще пару полей и твой профиль будет готов`);
+        await ctx.reply(`Супер, нужно заполнить еще несколько полей и твой профиль будет готов`);
         await ctx.scene.enter('profileNormalize');
     } else {
         await ctx.reply(`Написал в поддержку, скоро тебе помогут`);
