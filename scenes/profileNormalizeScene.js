@@ -48,7 +48,7 @@ const profileNormalizeScene = new WizardScene(
             const { error } = await supabase
                 .from('Users')
                 .update({ [ctx.session.currentField]: data })
-                .eq('telegram', ctx.session.user.telegram);
+                .eq('telegram', ctx.session.user?.telegram);
             await ctx.answerCbQuery();
 
             ctx.session.missingData.shift();
