@@ -52,9 +52,9 @@ const profileNormalizeScene = new WizardScene(
             await ctx.answerCbQuery();
 
             ctx.session.missingData.shift();
-            if(ctx.session.missingData[0]){
-                await ctx.reply(`Следующее поле ${ctx.session.missingData[0]}`);
-            }
+            // if(ctx.session.missingData[0]){
+            //     await ctx.reply(`Следующее поле ${ctx.session.missingData[0]}`);
+            // }
         }
         if(!ctx.session.missingData) {
             ctx.session.missingData = getMissingData(ctx.session.user).filter(field => dataDict.hasOwnProperty(field));
@@ -95,7 +95,7 @@ const profileNormalizeScene = new WizardScene(
                  }
                  else {
                      const skills = skillsDict.map(item => item.name)
-                     await ctx.reply('Можно выбрать до 5 навыков', Markup.inlineKeyboard(makeKeyboard(skills, 2, 'skills'), {columns: 3}));
+                     await ctx.reply('Какие у тебя профессиональные интересы? Можно выбрать до 5-ти штук', Markup.inlineKeyboard(makeKeyboard(skills, 2, 'skills'), {columns: 3}));
                      await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
                  }
                  if(ctx.session.skills.length >= 5) {
@@ -114,10 +114,10 @@ const profileNormalizeScene = new WizardScene(
                 }
                 else {
                     const hobbies = hobbiesDict.map(item => item.name)
-                    await ctx.reply('Можно выбрать до 7 интересов', Markup.inlineKeyboard(makeKeyboard(hobbies, 2, 'hobbies'), {columns: 3}));
+                    await ctx.reply('Чем увлекаешься? Максимально 5', Markup.inlineKeyboard(makeKeyboard(hobbies, 2, 'hobbies'), {columns: 3}));
                     await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
                 }
-                if(ctx.session.hobbies.length >= 7) {
+                if(ctx.session.hobbies.length >= 5) {
                     return ctx.wizard.next();
                 }
                 return ctx.wizard.selectStep(0)
