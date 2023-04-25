@@ -65,25 +65,25 @@ const profileNormalizeScene = new WizardScene(
         }
 
         ctx.session.currentField = ctx.session.missingData[0];
-        if(ctx.session.missingData.length && !ctx.callbackQuery) {
+        if(!ctx.callbackQuery) {
             await ctx.reply(`Оставшиеся поля:
 - ${ctx.session.missingData.map(item => dataDict[item]).join("\n- ")}`);
         }
         switch (ctx.session.currentField) {
             case 'name':
-                 await ctx.reply('Введите новое имя');
+                 await ctx.reply('Как тебя зовут?');
                 break;
             case 'profile_photo_url':
-                 await ctx.reply('Отправьте новое фото');
+                 await ctx.reply('Не нашел фото, пришли новое');
                 break;
             case 'description':
-                 await ctx.reply('Введите новое описание');
+                 await ctx.reply('Напиши в ответ новое описание: пара предложений о твоих профессиональных интересах, взглядах, хобби');
                 break;
             case 'requests':
-                 await ctx.reply('Введите новые запросы');
+                 await ctx.reply('Какие сейчас запросы к сообществу? Введи в свободном формате через запятую');
                 break;
             case 'superpower':
-                 await ctx.reply('Введите новую суперспособность');
+                 await ctx.reply('Какая у тебя суперсила?');
                 break;
             case 'skills':
                  const skillsAnswer = ctx.callbackQuery?.data.split('_')[1]
@@ -91,12 +91,12 @@ const profileNormalizeScene = new WizardScene(
                  if(skillsAnswer && skillsPrefix === 'skills'){
                     await ctx.answerCbQuery();
                     ctx.session.skills.push(skillsAnswer);
-                    await ctx.reply(`✅ Добавлено ${skillsAnswer}`);
+                    await ctx.reply(`✅ Добавил ${skillsAnswer}`);
                  }
                  else {
                      const skills = skillsDict.map(item => item.name)
                      await ctx.reply('Можно выбрать до 5 навыков', Markup.inlineKeyboard(makeKeyboard(skills, 2, 'skills'), {columns: 3}));
-                     await ctx.reply('Нажмите "Готово" когда закончите', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
+                     await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
                  }
                  if(ctx.session.skills.length >= 5) {
                      return ctx.wizard.next();
@@ -115,7 +115,7 @@ const profileNormalizeScene = new WizardScene(
                 else {
                     const hobbies = hobbiesDict.map(item => item.name)
                     await ctx.reply('Можно выбрать до 7 интересов', Markup.inlineKeyboard(makeKeyboard(hobbies, 2, 'hobbies'), {columns: 3}));
-                    await ctx.reply('Нажмите "Готово" когда закончите', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
+                    await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
                 }
                 if(ctx.session.hobbies.length >= 7) {
                     return ctx.wizard.next();
@@ -123,15 +123,14 @@ const profileNormalizeScene = new WizardScene(
                 return ctx.wizard.selectStep(0)
                 break;
             case 'groups':
-                 await ctx.reply('Введите новую группу');
+                 await ctx.reply('К каким группам себя относишь?');
                 break;
             default:
-
-                // const { error } = await supabase
-                //     .from('Users')
-                //     .update({ is_updated: true })
-                //     .eq('telegram', ctx.session.user.telegram);
-                await ctx.reply('Теперь заполним запрос на эту неделю');
+                const { error } = await supabase
+                    .from('Users')
+                    .update({ is_updated: true })
+                    .eq('telegram', ctx.session.user.telegram);
+                await ctx.reply('Профиль готов! Теперь давай заполним заявку на следующую встречу. Там буквально пару вопросов 😌');
                 return ctx.scene.enter('requestScene');
         }
         return ctx.wizard.next();

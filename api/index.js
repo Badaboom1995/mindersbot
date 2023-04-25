@@ -1,6 +1,5 @@
 const {Telegraf, Markup, Scenes, session} = require('telegraf');
 const {skills, hobbies}  = require("../data/skills.js");
-const {collectHobbies} = require("../helpers/gpt");
 const {messages} = require("../config");
 const {makeKeyboard} = require("../helpers/keyboard");
 const {editScene} = require("../scenes/editScene");
@@ -11,13 +10,11 @@ const {sendToAdmins} = require("../helpers/sendToAdmins");
 const {supabase} = require("../supabase");
 const cloudinary = require('cloudinary').v2;
 
-
 cloudinary.config({
     cloud_name: "dgpgmk0w7",
     api_key: "928942683275635",
     api_secret: "p2Zvcv3kPZt0bLNpBbHhSNZXiac"
 });
-
 
 const bot = new Telegraf('5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ');
 
@@ -64,12 +61,12 @@ bot.start(async (ctx) => {
     }
     if (user) {
         if(user.is_updated){
-            await ctx.reply("Нашел! Похоже с твоим профилем уже все в порядке. Если хочешь что-то поменять, напиши /edit");
+            await ctx.reply("Нашел! Похоже ты уже обновлял профиль. Если хочешь что-то поменять, напиши edit");
             await sendProfile(ctx, user)
             await ctx.scene.enter('requestScene');
         } else {
             await sendProfile(ctx, user)
-            await ctx.reply('Твой профиль? Дозаполнить можно будет дальше',Markup.inlineKeyboard(makeKeyboard(['Да, мой', 'Не мой'], 3, 'isRight'), {columns: 3}))
+            await ctx.reply('Твой профиль? Дозаполнить и изменить можно будет дальше',Markup.inlineKeyboard(makeKeyboard(['Да, мой', 'Не мой'], 3, 'isRight'), {columns: 3}))
         }
     }
 });
@@ -78,7 +75,7 @@ bot.action(/isRight_(.+)/, async (ctx) => {
     const optionName = ctx.match[1];
     await ctx.answerCbQuery(); // Required to close the loading state on the button
     if(optionName === 'Да, мой') {
-        await ctx.reply(`Отлично! Тогда поехали дальше`);
+        await ctx.reply(`Супер, нужно заполнить еще пару полей и твой профиль будет готов`);
         await ctx.scene.enter('profileNormalize');
     } else {
         await ctx.reply(`Написал в поддержку, скоро тебе помогут`);

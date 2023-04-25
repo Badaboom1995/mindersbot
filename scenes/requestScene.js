@@ -9,10 +9,9 @@ var weekday = require('dayjs/plugin/weekday')
 
 
 dayjs.extend(weekOfYear)
-
 dayjs.extend(weekday)
-
-
+const doneMessage = `Готово! Твой профиль и запрос опубликованы. Скоро подберем тебе собеседника.
+Если захочешь изменить профиль или запрос - воспользуйся клавиатурой ниже. Там же ты можешь отменить свое участие на следующей неделе, поменять пару и тд.`
 const checkCorrectAnswer = (ctx, prefix, isText) => {
     if(!ctx.callbackQuery) return false;
     const {data} = ctx.callbackQuery;
@@ -67,7 +66,8 @@ const requestScene = new WizardScene(
     'requestScene',
     async (ctx) => {
         await ctx.reply(
-            'Хочешь встречаться онлайн или офлайн?',
+            `Хочешь встречаться онлайн или офлайн? 
+Если выберешь "офлайн" ботик постарается подобрать собеседника из твоего района, который тоже хочет встретиться оффлайн и пришлет рандомную пару, только если по каким-то причинам (на этой неделе такой формат не выбрал никто из твоего города, например, или выбравших нечетное количество) не получится.`,
             Markup.inlineKeyboard(
                 makeKeyboard(
                     ['Офлайн', "Онлайн"],
@@ -79,7 +79,7 @@ const requestScene = new WizardScene(
     },
     async (ctx) => {
         if(!checkCorrectAnswer(ctx, 'format')) {
-            await ctx.reply('Пожалуйста, выберите один из предложенных вариантов или нажмите "Отмена"');
+            await ctx.reply('Пожалуйста, выбери один из предложенных вариантов');
             return ctx.scene.enter('requestScene');
         }
         await ctx.answerCbQuery();
@@ -88,7 +88,9 @@ const requestScene = new WizardScene(
         // send image
         await ctx.replyWithPhoto('https://ibb.co/CwzxZ3F');
         await ctx.reply(
-            'Выбери соотношение фана и пользы. Чем больше цифра тем больше пользы',
+            `Некоторые люди приходят на встречи, чтобы найти партнёров для будущих проектов и завести полезные контакты, условно назовём это "пользой". А кто-то приходит для расширения кругозора, новых эмоций и открытия чего-то нового, назовём это "фан". Какое описание больше подходит тебе?
+            
+Выбери соотношение фана и пользы. Чем больше цифра тем больше пользы. Картинка поможет с выбором :)`,
             Markup.inlineKeyboard(
                 makeKeyboard(
                     ['0', "25", "50", "75", "100"],
@@ -100,14 +102,14 @@ const requestScene = new WizardScene(
     },
     async (ctx) => {
         if(!checkCorrectAnswer(ctx, 'funOrProfit')) {
-            await ctx.reply('Пожалуйста, выберите один из предложенных вариантов или нажмите "Отмена"');
+            await ctx.reply('Пожалуйста, выбери один из предложенных вариантов');
             return ctx.wizard.selectStep(2);
         }
         await ctx.answerCbQuery();
         const answer = ctx.callbackQuery?.data.split('_')[1]
         ctx.session.funOrProfit = answer;
         if(ctx.session.format === 'Онлайн') {
-            await ctx.reply(`Готово! Скоро подберем тебе пару`);
+            await ctx.reply(doneMessage);
             await saveRequestToDB(ctx);
             return ctx.scene.leave()
         }
@@ -116,7 +118,7 @@ const requestScene = new WizardScene(
             Markup.inlineKeyboard(
                 makeKeyboard(
                     ['Чангу', "Семеньяк", "Букит", "Убуд"],
-                    3, 'location'),
+                    2, 'location'),
                 {columns: 3}
             )
         );
@@ -131,7 +133,7 @@ const requestScene = new WizardScene(
 
         await ctx.answerCbQuery();
         await saveRequestToDB(ctx);
-        await ctx.reply(`Готово! Скоро подберем тебе пару`);
+        await ctx.reply(doneMessage);
 
         return ctx.scene.leave()
     }
