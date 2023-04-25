@@ -84,7 +84,7 @@ bot.action(/isRight_(.+)/, async (ctx) => {
         await ctx.reply(`Написал в поддержку, скоро тебе помогут`);
         // add timestamp to string
         const timestamp = new Date().toLocaleString();
-        sendToAdmins(`🚨Пользователь ${ctx.from.username} не признал свой профиль, ${timestamp}`, bot)
+        await sendToAdmins(`🚨Пользователь ${ctx.from.username} не признал свой профиль, ${timestamp}`, bot)
         // await ctx.scene.enter('editProfile');
     }
 })
