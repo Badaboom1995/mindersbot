@@ -2,14 +2,13 @@ const {Markup, Scenes} = require("telegraf");
 const {makeKeyboard} = require("../helpers/keyboard");
 const { WizardScene } = Scenes;
 const {supabase} = require("../supabase");
-const {getUserFormDB, sendProfile} = require("../helpers/getUserFormDB");
 const dayjs = require('dayjs');
 var weekOfYear = require('dayjs/plugin/weekOfYear')
 var weekday = require('dayjs/plugin/weekday')
 
-
 dayjs.extend(weekOfYear)
 dayjs.extend(weekday)
+
 const doneMessage = `⭐️ Готово! Твой профиль и запрос опубликованы. Скоро подберем тебе пару.
 
 Если захочешь изменить профиль или запрос - воспользуйся клавиатурой ниже. Там же ты можешь отменить свое участие на следующей неделе, поменять пару и тд.`
@@ -49,16 +48,12 @@ const saveRequestToDB = async (ctx) => {
             .from('Requests')
             .insert([request])
     } else {
-        console.log(dayjs(currRequest.created_at).week())
-        console.log(currRequest)
         const { data, error } = await supabase
             .from('Requests')
             .update(request)
             .eq('id', currRequest.id)
 
         if(error) console.log('error', error)
-        console.log('data', data)
-
     }
 
 }
@@ -87,7 +82,6 @@ const requestScene = new WizardScene(
         await ctx.answerCbQuery();
         const answer = ctx.callbackQuery?.data.split('_')[1]
         ctx.session.format = answer;
-        // send image
         await ctx.replyWithPhoto('https://ibb.co/CwzxZ3F');
         await ctx.reply(
             `Некоторые люди приходят на встречи, чтобы найти партнёров для будущих проектов и завести полезные контакты, условно назовём это "пользой". А кто-то приходит для расширения кругозора, новых эмоций и открытия чего-то нового, назовём это "фан". Какое описание больше подходит тебе?
