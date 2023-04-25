@@ -45,16 +45,15 @@ const profileNormalizeScene = new WizardScene(
                     data = ctx.session.hobbies.map(hobby => hobbiesDict.find(item => item.name === hobby).id).join(',')
                 }
             }
-            const { error } = await supabase
+
+            await supabase
                 .from('Users')
                 .update({ [ctx.session.currentField]: data })
                 .eq('telegram', ctx.session.user?.telegram);
+
             await ctx.answerCbQuery();
 
             ctx.session.missingData.shift();
-            // if(ctx.session.missingData[0]){
-            //     await ctx.reply(`Следующее поле ${ctx.session.missingData[0]}`);
-            // }
         }
         if(!ctx.session.missingData) {
             ctx.session.missingData = getMissingData(ctx.session.user).filter(field => dataDict.hasOwnProperty(field));
@@ -148,9 +147,14 @@ const profileNormalizeScene = new WizardScene(
             }
         }
         if(ctx.session.currentField === 'profile_photo_url') {
-            const photoUrl = await ctx.telegram.getFileLink(ctx.message.photo[ctx.message.photo.length-1].file_id);
-            const cdnURL = await uploadImage(photoUrl, ctx);
-            data = cdnURL
+            if(ctx.message.photo){
+                const photoUrl = await ctx.telegram.getFileLink(ctx.message.photo[ctx.message.photo.length - 1].file_id);
+                const cdnURL = await uploadImage(photoUrl, ctx);
+                data = cdnURL
+            } else {
+                await ctx.reply('Пришли фото через вложение, пожалуйста');
+                return ctx.scene.enter('profileNormalize');
+            }
         }
         // console.log(photoUrl)
         // 2 save to db
