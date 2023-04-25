@@ -1,11 +1,9 @@
-const {Markup, Scenes, session} = require("telegraf");
+const {Markup, Scenes} = require("telegraf");
 const {makeKeyboard} = require("../helpers/keyboard");
-const { WizardScene } = Scenes;
+const { WizardScene} = Scenes;
 const {supabase} = require("../supabase");
-const {getUserFormDB, sendProfile} = require("../helpers/getUserFormDB");
 const {getMissingData} = require("../helpers/getMissingData");
 const {skillsDict, hobbiesDict} = require("../config");
-const {reverseDict} = require("../helpers/reverseDict");
 const {uploadImage} = require("../helpers/uploadImage");
 
 const checkCorrectAnswer = (ctx, prefix, isText) => {
@@ -129,7 +127,7 @@ const profileNormalizeScene = new WizardScene(
                     .from('Users')
                     .update({ is_updated: true })
                     .eq('telegram', ctx.session.user.telegram);
-                await ctx.reply('Профиль готов! Теперь давай заполним заявку на следующую встречу. Там буквально пару вопросов 😌');
+                await ctx.reply('Профиль готов! Теперь давай заполним заявку на следующую встречу. Это быстро 😌');
                 return ctx.scene.enter('requestScene');
         }
         return ctx.wizard.next();

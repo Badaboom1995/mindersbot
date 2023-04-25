@@ -103,7 +103,7 @@ const requestScene = new WizardScene(
         }
         await ctx.answerCbQuery();
         const answer = ctx.callbackQuery?.data.split('_')[1]
-        ctx.session.funOrProfit = answer;
+        ctx.session.funOrProfit = answer.replace("%", "");
         if(ctx.session.format === 'Онлайн') {
             await ctx.reply(doneMessage);
             await saveRequestToDB(ctx);
