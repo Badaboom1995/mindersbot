@@ -47,12 +47,32 @@ const saveChatId = async (ctx) => {
 }
 
 bot.start(async (ctx) => {
-    ctx.session = {};
     saveChatId(ctx);
+    ctx.session = {};
+    await ctx.reply(messages.welcome(ctx.from.first_name), Markup.inlineKeyboard(makeKeyboard(['Синхронизировать профиль'], 3, 'sync'), {columns: 3}));
+    // const {user, error} = await getUserFormDB(username);
+    // ctx.session.user = user;
+    // if (error) {
+    //     ctx.reply(messages.notFoundProfile());
+    //     const timestamp = new Date().toLocaleString();
+    //     sendToAdmins(`🚨Не нашли пользователя ${ctx.from.username}, ${timestamp}`, bot)
+    // }
+    // if (user) {
+    //     if(user.is_updated){
+    //         await ctx.reply("Нашел! Похоже ты уже обновлял профиль. Если хочешь что-то поменять, напиши edit");
+    //         await sendProfile(ctx, user)
+    //         await ctx.scene.enter('requestScene');
+    //     } else {
+    //         await sendProfile(ctx, user)
+    //         await ctx.reply('Твой профиль? Дозаполнить и изменить можно будет дальше',Markup.inlineKeyboard(makeKeyboard(['Да, мой', 'Не мой'], 3, 'isRight'), {columns: 3}))
+    //     }
+    // }
+});
+
+bot.action(/sync(.+)/, async (ctx) => {
     const username =  ctx.from.username;
-    ctx.reply(messages.welcome(ctx.from.first_name));
-    await ctx.telegram.sendChatAction(ctx.chat.id, 'typing');
     const {user, error} = await getUserFormDB(username);
+    await ctx.telegram.sendChatAction(ctx.chat.id, 'typing');
     ctx.session.user = user;
     if (error) {
         ctx.reply(messages.notFoundProfile());
@@ -69,8 +89,7 @@ bot.start(async (ctx) => {
             await ctx.reply('Твой профиль? Дозаполнить и изменить можно будет дальше',Markup.inlineKeyboard(makeKeyboard(['Да, мой', 'Не мой'], 3, 'isRight'), {columns: 3}))
         }
     }
-});
-
+})
 bot.action(/isRight_(.+)/, async (ctx) => {
     const optionName = ctx.match[1];
     await ctx.answerCbQuery(); // Required to close the loading state on the button
