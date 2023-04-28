@@ -1,3 +1,3 @@
 const {bot} = require("./index");
-// console log asdasd asdasd
+// one more
 bot.telegram.sendMessage(208165379, 'cron')
