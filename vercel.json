@@ -9,12 +9,6 @@
       "use": "@vercel/node"
     }
   ],
-  "crons": [
-    {
-      "path": "/api/daily",
-      "schedule": "* * * * *"
-    }
-  ],
   "routes": [
     {
       "src": "/api/index",
