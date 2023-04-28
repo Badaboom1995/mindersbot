@@ -10,7 +10,7 @@
     }
   ],
   "crons": [
-    {
+    {git
       "path": "/api/daily.js",
       "schedule": "* * * * *"
     }
