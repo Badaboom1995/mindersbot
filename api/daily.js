@@ -2,10 +2,13 @@ const {Telegraf} = require("telegraf");
 
 const prodToken = '5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ'
 const bot = new Telegraf(prodToken);
-
+const dailyFuncs = async () => {
+    await bot.telegram.sendMessage(208165379, 'cron')
+    console.log('cron works')
+}
 module.exports = async (req, res) => {
     try {
-        // Your request handling logic here
+        dailyFuncs()
         res.status(200).send('Cron job executed successfully');
     } catch (error) {
         console.error(error);
@@ -13,12 +16,5 @@ module.exports = async (req, res) => {
     }
 };
 
-const dailyFuncs = async () => {
-    await bot.telegram.sendMessage(208165379, 'cron')
-    console.log('cron works')
-}
-
-console.log('cron works outside')
-dailyFuncs()
 
 
