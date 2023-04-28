@@ -23,7 +23,7 @@ const checkGroupMatch = (user, profile) => {
         return false
     }
 }
-let counter = 0
+
 const findPersonalMatch = (user, clusters, start, pairedUsers) => {
     const currClusters = clusters.slice(start.clusterIndex)
     currClusters[0] = currClusters[0].slice(start.index + 1)
@@ -33,7 +33,12 @@ const findPersonalMatch = (user, clusters, start, pairedUsers) => {
             if(profile.id === user.id || pairedUsers.has(profile)) return
             let score = Math.floor(Math.random() * 300)
             // filter offline-online ------
-            // if offline filter by location -----
+                // find request for this week for lhs and rhs
+                // if format is not equal - return
+            // if offline filter by location
+                // compare location in request
+                // if not equal - return
+
 
             // if(getMainGroup(user) === getMainGroup(profile)) {
             //     score -= 200
@@ -51,6 +56,7 @@ const findPersonalMatch = (user, clusters, start, pairedUsers) => {
             // if(profile.age > user.age - 5 && profile.age < user.age + 5) {
             //     score += 50
             // }
+
             if(bestMatch.score < score) {
                 bestMatch = {profile, score}
             }
@@ -80,6 +86,9 @@ const runMatching = (clusters) => {
             pairedUsers.add(pair.profile);
         })
     })
+    // check who is left
+    // apply soft matching
+    // join pairs
 }
 
 const weeklyMatching = async () => {

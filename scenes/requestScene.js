@@ -5,6 +5,7 @@ const {supabase} = require("../supabase");
 const dayjs = require('dayjs');
 var weekOfYear = require('dayjs/plugin/weekOfYear')
 var weekday = require('dayjs/plugin/weekday')
+const {createKeyboard} = require("../helpers/makeRegularKeyboard");
 
 dayjs.extend(weekOfYear)
 dayjs.extend(weekday)
@@ -12,6 +13,8 @@ dayjs.extend(weekday)
 const doneMessage = `⭐️ Готово! Твой профиль и запрос опубликованы. Скоро подберем тебе пару.
 
 Если захочешь изменить профиль или запрос - воспользуйся клавиатурой ниже. Там же ты можешь отменить свое участие на следующей неделе, поменять пару и тд.`
+const mainKeyboard = createKeyboard({keys: ['👤 Профиль', '🗣 Запрос', "⏸ Поставить на паузу", "👥 Пара этой недели"], rows:2})
+
 const checkCorrectAnswer = (ctx, prefix, isText) => {
     if(!ctx.callbackQuery) return false;
     const {data} = ctx.callbackQuery;
@@ -105,8 +108,9 @@ const requestScene = new WizardScene(
         const answer = ctx.callbackQuery?.data.split('_')[1]
         ctx.session.funOrProfit = answer.replace("%", "");
         if(ctx.session.format === 'Онлайн') {
-            await ctx.reply(doneMessage);
+            await ctx.reply(doneMessage, mainKeyboard);
             await saveRequestToDB(ctx);
+
             return ctx.scene.leave()
         }
         await ctx.reply(
@@ -129,8 +133,7 @@ const requestScene = new WizardScene(
 
         await ctx.answerCbQuery();
         await saveRequestToDB(ctx);
-        await ctx.reply(doneMessage);
-
+        await ctx.reply(doneMessage, mainKeyboard);
         return ctx.scene.leave()
     }
 );

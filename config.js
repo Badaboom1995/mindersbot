@@ -1,6 +1,6 @@
 const messages = {
-    // welcome: (name) => `Привет ${name}! Это рандомный кофе от minders. Возможно ты уже заполнял анкету, сейчас поищу, секунду...⏳`,
     welcome: (name) => `Привет!
+    
 Я Matching бот сообщества Minders
 Каждую неделю я буду предлагать тебе для встречи интересного человека, случайно выбранного среди других участников сообщества.
 Чтобы принять участие во встречах, нужно заполнить анкету.
@@ -30,38 +30,49 @@ const userDataDict = {
 const skillsDict = [
     {id: 'startup', name: 'Стартапы'},
     {id: 'marketing', name: 'Маркетинг'},
+    {id: 'advertisement', name: 'Рекламам'},
     {id: 'productManagement', name: 'Управление продуктом'},
     {id: 'sales', name: 'Продажи'},
+    {id: 'bizdev', name: 'Бизнес развитие'},
     {id: 'finance', name: 'Финансы'},
     {id: 'uxUiDesign', name: 'UX/UI'},
-    {id: 'mobileAppDevelopment', name: 'Мобильные приложения'},
+    {id: 'mobileAppDevelopment', name: 'Мобильная разработка'},
     {id: 'dataScience', name: 'Data Science'},
     {id: 'blockchain', name: 'Блокчейн'},
-    {id: 'eventManagement', name: 'Мероприятия'},
-    {id: 'mediaMarketing', name: 'Медиа'},
-    {id: 'law', name: 'Юридические'},
-    {id: 'hr', name: 'Кадры'},
-    {id: 'operationsManagement', name: 'Операции'},
+    {id: 'blockchain', name: 'Machine Learning'},
+    {id: 'eventManagement', name: 'Организация мероприятий'},
+    {id: 'mediaMarketing', name: 'Медиа маркетинг'},
+    {id: 'law', name: 'Юриспруденция'},
+    {id: 'hr', name: 'HR'},
+    {id: 'operationsManagement', name: 'Операционный менеджмент'},
     {id: 'logistics', name: 'Логистика'},
     {id: 'sustainability', name: 'Экология'},
-    {id: 'education', name: 'Обучение'},
+    {id: 'education', name: 'Образование'},
     {id: 'ventureInvesting', name: 'Венчурные инвестиции'},
     {id: 'privateInvesting', name: 'Частные инвестиции'}
 ];
+
 const hobbiesDict = [
     {id: 'travel', name: 'Путешествия'},
     {id: 'fitness', name: 'Фитнес'},
     {id: 'cooking', name: 'Кулинария'},
     {id: 'art', name: 'Искусство'},
     {id: 'cars', name: 'Автомобили'},
+    {id: 'cars', name: 'Мотоциклы'},
     {id: 'photography', name: 'Фото/Видео'},
     {id: 'music', name: 'Музыка'},
-    {id: 'movies', name: 'Кино'},
+    {id: 'movies', name: 'Кино/Сериалы'},
     {id: 'literature', name: 'Литература'},
     {id: 'yoga', name: 'Йога'},
-    {id: 'gaming', name: 'Игры'},
+    {id: 'meditation', name: 'Медитация'},
+    {id: 'gaming', name: 'Видеоигры'},
+    {id: 'boardGames', name: 'Настольные игры'},
     {id: 'cycling', name: 'Велоспорт'},
     {id: 'hiking', name: 'Хайкинг'},
+    {id: 'running', name: 'Бег'},
+    {id: 'squash', name: 'Сквош'},
+    {id: 'tennis', name: 'Теннис'},
+    {id: 'extreme', name: 'Экстримальный спорт'},
     {id: 'fashion', name: 'Мода'},
     {id: 'dance', name: 'Танцы'},
     {id: 'gardening', name: 'Садоводство'},
@@ -70,7 +81,5 @@ const hobbiesDict = [
     {id: 'volunteering', name: 'Волонтерство'},
     {id: 'language', name: 'Языки'}
 ];
-
-
 
 module.exports = {messages, userDataDict, skillsDict, hobbiesDict}
