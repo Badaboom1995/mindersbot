@@ -118,7 +118,6 @@ bot.hears('⏸ Поставить на паузу', async (ctx) => {
     await ctx.reply('Вам не будут приходить оповещения до конца следующей недели')
 });
 
-module.exports = {bot}
 // bot.on('text', async (ctx) => {
 //     if(ctx.message.text === '/start') return
 //     if(ctx.message.text === 'edit'){
