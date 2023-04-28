@@ -18,6 +18,7 @@ cloudinary.config({
 });
 
 // const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
+// ddd
 const prodToken = '5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ'
 const bot = new Telegraf(prodToken);
 
