@@ -1,3 +1,8 @@
 const {bot} = require("./index");
 // one more
-bot.telegram.sendMessage(208165379, 'cron')
+const dailyFuncs = async () => {
+    await bot.telegram.sendMessage(208165379, 'cron')
+    console.log('cron works')
+}
+
+dailyFuncs()
