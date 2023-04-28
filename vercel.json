@@ -11,7 +11,7 @@
   ],
   "crons": [
     {
-      "path": "/api/daily.js",
+      "path": "/api/daily",
       "schedule": "* * * * *"
     }
   ],
