@@ -7,6 +7,10 @@
     {
       "src": "api/index.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "api/daily.js",
+      "use": "@vercel/node"
     }
   ],
   "crons": [
