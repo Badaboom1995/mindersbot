@@ -38,10 +38,11 @@ const saveRequestToDB = async (ctx) => {
         .eq('telegram', ctx.from.username)
 
     const request = {
-        format: ctx.session.format,
         profit_level: ctx.session.funOrProfit,
-        location: answer,
+        format: ctx.session.format,
     }
+    if(ctx.session.location) request.location = ctx.session.location;
+
     if(!currRequest) {
         request.telegram = ctx.from.username;
         await supabase
@@ -60,32 +61,9 @@ const saveRequestToDB = async (ctx) => {
 
 const requestScene = new WizardScene(
     'requestScene',
+    /// STEP 0 --------------------
     async (ctx) => {
-        track('request scene enter', {
-            username: ctx.from.username,
-        })
-        await ctx.reply(
-            `Как ты хочешь встречаться с участниками -- онлайн или офлайн на Бали?`,
-            Markup.inlineKeyboard(
-                makeKeyboard(
-                    ['Офлайн', "Онлайн"],
-                    3, 'format'),
-                {columns: 3}
-            )
-        );
-        track('meeting format', {
-            username: ctx.from.username,
-        })
-        return ctx.wizard.next();
-    },
-    async (ctx) => {
-        if(!checkCorrectAnswer(ctx, 'format')) {
-            await ctx.reply('Пожалуйста, выбери один из предложенных вариантов');
-            return ctx.scene.enter('requestScene');
-        }
-        await ctx.answerCbQuery();
-        const answer = ctx.callbackQuery?.data.split('_')[1]
-        ctx.session.format = answer;
+        await ctx.reply('Теперь давай заполним твой запрос на следующую неделю.');
         await ctx.replyWithPhoto('https://ibb.co/CwzxZ3F');
         await ctx.reply(
             `Некоторые люди приходят на встречи, чтобы найти партнёров для будущих проектов и завести полезные контакты, условно назовём это "пользой". А кто-то приходит для расширения кругозора, новых эмоций и открытия чего-то нового, назовём это "фан". Какое описание больше подходит тебе?
@@ -103,23 +81,46 @@ const requestScene = new WizardScene(
         })
         return ctx.wizard.next();
     },
+    /// STEP 1 --------------------
     async (ctx) => {
         if(!checkCorrectAnswer(ctx, 'funOrProfit')) {
             await ctx.reply('Пожалуйста, выбери один из предложенных вариантов');
-            return ctx.wizard.selectStep(2);
+            return ctx.scene.enter('requestScene');
         }
         await ctx.answerCbQuery();
         const answer = ctx.callbackQuery?.data.split('_')[1]
         ctx.session.funOrProfit = answer.replace("%", "");
-        if(ctx.session.format === 'Онлайн') {
-            await ctx.reply(doneMessage, mainKeyboard);
-            await saveRequestToDB(ctx);
-
-            return ctx.scene.leave()
-        }
-        track('location', {
+        await ctx.reply(
+            `Как ты хочешь встречаться с участниками - онлайн или офлайн на Бали?`,
+            Markup.inlineKeyboard(
+                makeKeyboard(
+                    ['Офлайн', "Онлайн"],
+                    3, 'format'),
+                {columns: 3}
+            )
+        );
+        track('meeting format filled', {
             username: ctx.from.username,
         })
+        return ctx.wizard.next();
+    },
+    /// STEP 2 --------------------
+    async (ctx) => {
+        if(!checkCorrectAnswer(ctx, 'format')) {
+            await ctx.reply('Пожалуйста, выбери один из предложенных вариантов');
+            return ctx.wizard.selectStep(1);
+        }
+        await ctx.answerCbQuery();
+        const answer = ctx.callbackQuery?.data.split('_')[1]
+        ctx.session.format = answer
+        if(answer === 'Онлайн') {
+            await saveRequestToDB(ctx);
+            await ctx.reply(doneMessage, mainKeyboard);
+            track('request done', {
+                username: ctx.from.username,
+            })
+            return ctx.scene.leave()
+        }
         await ctx.reply(
             'Выбери подходящие локации для встреч.',
             Markup.inlineKeyboard(
@@ -129,8 +130,12 @@ const requestScene = new WizardScene(
                 {columns: 3}
             )
         );
+        track('location', {
+            username: ctx.from.username,
+        })
         return ctx.wizard.next();
     },
+    /// STEP 3 FINAL --------------------
     async (ctx) => {
         // 1 Wait for text answer
         if(!checkCorrectAnswer(ctx, 'location')) {
@@ -138,6 +143,8 @@ const requestScene = new WizardScene(
             return ctx.wizard.selectStep(3);
         }
         await ctx.answerCbQuery();
+        const answer = ctx.callbackQuery?.data.split('_')[1]
+        ctx.session.location = answer
         await saveRequestToDB(ctx);
         await ctx.reply(doneMessage, mainKeyboard);
         track('request done', {

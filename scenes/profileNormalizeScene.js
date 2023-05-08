@@ -7,16 +7,16 @@ const {skillsDict, hobbiesDict} = require("../config");
 const {uploadImage} = require("../helpers/uploadImage");
 const {track} = require("@amplitude/analytics-node");
 
-const checkCorrectAnswer = (ctx, prefix, isText) => {
-    if(!ctx.callbackQuery) return false;
-    const {data} = ctx.callbackQuery;
-    const [answer_prefix, answer] = data.split('_');
-    if (answer_prefix === prefix) {
-        ctx.wizard.state.editField = answer;
-        return true;
-    }
-    return false;
-}
+// const checkCorrectAnswer = (ctx, prefix, isText) => {
+//     if(!ctx.callbackQuery) return false;
+//     const {data} = ctx.callbackQuery;
+//     const [answer_prefix, answer] = data.split('_');
+//     if (answer_prefix === prefix) {
+//         ctx.wizard.state.editField = answer;
+//         return true;
+//     }
+//     return false;
+// }
 
 const dataDict = {
     name: 'Имя',
@@ -87,6 +87,11 @@ const profileNormalizeScene = new WizardScene(
                  await ctx.reply('Какая у тебя супер сила? Как ты считаешь, в чем тебе нет равных?');
                 break;
             case 'skills':
+                if(ctx.session.skills.length >= 5) {
+                    await ctx.reply(`Выбрано максимальное количество`);
+                    ctx.session.missingData.shift();
+                    return ctx.scene.enter('profileNormalize');
+                }
                  if(answer && prefix === 'skills'){
                      track('skill added', {
                          username: ctx.from.username,
@@ -101,12 +106,14 @@ const profileNormalizeScene = new WizardScene(
                      await ctx.reply('Выбери свои основные профессиональные навыки. Не более 5 вариантов.', Markup.inlineKeyboard(makeKeyboard(skills, 2, 'skills'), {columns: 3}));
                      await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
                  }
-                 if(ctx.session.skills.length >= 5) {
-                     return ctx.wizard.next();
-                 }
                  return ctx.wizard.selectStep(0)
                 break;
             case 'hobbies':
+                if(ctx.session.hobbies.length >= 5) {
+                    await ctx.reply(`Выбрано максимальное количество`);
+                    ctx.session.missingData.shift();
+                    return ctx.scene.enter('profileNormalize');
+                }
                 if(answer && prefix === 'hobbies'){
                     await ctx.answerCbQuery();
                     track('hobby added', {
@@ -120,9 +127,6 @@ const profileNormalizeScene = new WizardScene(
                     const hobbies = hobbiesDict.map(item => item.name)
                     await ctx.reply('Выбери свои увлечения и хобби. Не более 5 вариантов.', Markup.inlineKeyboard(makeKeyboard(hobbies, 2, 'hobbies'), {columns: 3}));
                     await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
-                }
-                if(ctx.session.hobbies.length >= 5) {
-                    return ctx.wizard.next();
                 }
                 return ctx.wizard.selectStep(0)
                 break;
@@ -176,13 +180,13 @@ const profileNormalizeScene = new WizardScene(
 
         if(error) {
             await ctx.reply('❌ Ошибка');
+            console.log('qweqwewqe')
             track('profile normalize save error', {
                 username: ctx.from.username,
             })
             return ctx.scene.enter('profileNormalize');
 
         } else {
-
             await ctx.reply('✅ Сохранил');
             track('profile normalize saved prop', {
                 username: ctx.from.username,
