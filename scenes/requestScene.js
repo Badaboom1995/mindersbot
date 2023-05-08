@@ -115,7 +115,7 @@ const requestScene = new WizardScene(
         ctx.session.format = answer
         if(answer === 'Онлайн') {
             await saveRequestToDB(ctx);
-            await ctx.reply(doneMessage, mainKeyboard);
+            await ctx.reply(doneMessage);
             track('request done', {
                 username: ctx.from.username,
             })
@@ -146,7 +146,7 @@ const requestScene = new WizardScene(
         const answer = ctx.callbackQuery?.data.split('_')[1]
         ctx.session.location = answer
         await saveRequestToDB(ctx);
-        await ctx.reply(doneMessage, mainKeyboard);
+        await ctx.reply(doneMessage);
         track('request done', {
             username: ctx.from.username,
         })
