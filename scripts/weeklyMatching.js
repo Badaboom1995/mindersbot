@@ -32,6 +32,8 @@ const findPersonalMatch = (user, clusters, start, pairedUsers) => {
         cluster.forEach((profile, j) => {
             if(profile.id === user.id || pairedUsers.has(profile)) return
             let score = Math.floor(Math.random() * 300)
+            // filter if already have been paired
+                // check in table Pairs
             // filter offline-online ------
                 // find request for this week for lhs and rhs
                 // if format is not equal - return
@@ -97,7 +99,7 @@ const weeklyMatching = async () => {
         .from('Users')
         .select('*')
         .eq('is_ready', true)
-console.log(Users.length)
+
     const clasters = Users.reduce( (acc, user) => {
         if(user.groups.includes('Я инвестор')) {
             acc.investors.push(user)

@@ -1,5 +1,4 @@
 const {Telegraf, Markup, Scenes, session} = require('telegraf');
-const {skills, hobbies}  = require("../data/skills.js");
 const {messages} = require("../config");
 const {makeKeyboard} = require("../helpers/keyboard");
 const {editScene} = require("../scenes/editScene");
@@ -10,6 +9,15 @@ const {sendToAdmins} = require("../helpers/sendToAdmins");
 const {supabase} = require("../supabase");
 const {wait} = require("../helpers/wait");
 const cloudinary = require('cloudinary').v2;
+const { init, track } = require('@amplitude/analytics-node');
+
+init('fc185899af59f00b16d189f6bae75ad');
+
+const dayjs = require('dayjs');
+const weekOfYear = require("dayjs/plugin/weekOfYear");
+const weekday = require("dayjs/plugin/weekday");
+dayjs.extend(weekOfYear)
+dayjs.extend(weekday)
 
 cloudinary.config({
     cloud_name: "dgpgmk0w7",
@@ -18,7 +26,6 @@ cloudinary.config({
 });
 
 // const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
-// ddd
 const prodToken = '5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ'
 const bot = new Telegraf(prodToken);
 
@@ -51,38 +58,41 @@ const saveChatId = async (ctx) => {
 }
 
 bot.start(async (ctx) => {
+    track('bot start', {
+        username: ctx.from.username,
+    })
     saveChatId(ctx);
     ctx.session = {};
-    await ctx.reply('👋')
-    await ctx.reply(messages.welcome(ctx.from.first_name), Markup.inlineKeyboard(makeKeyboard(['Синхронизировать профиль'], 3, 'sync'), {columns: 3}));
+    await ctx.reply(messages.welcome(ctx.from.first_name), Markup.inlineKeyboard(makeKeyboard(['Поехали 🚀'], 3, 'sync'), {columns: 3}));
 });
 
 bot.action(/sync(.+)/, async (ctx) => {
-    // const eyes = await ctx.reply("👀");
-    // await wait(200);
-    // const searchMsg = await ctx.reply("Ищу в базе данных...");
+    track('sync button pushed', {
+        username: ctx.from.username,
+    })
     const username =  ctx.from.username;
-    const chatId = ctx.chat.id;
     const {user, error} = await getUserFormDB(username);
     await ctx.answerCbQuery();
-    // await wait(500);
-    // await ctx.telegram.deleteMessage(chatId, eyes.message_id);
-    // await ctx.telegram.deleteMessage(chatId, searchMsg.message_id);
-    // await ctx.telegram.sendChatAction(ctx.chat.id, 'typing');
 
     ctx.session.user = user;
     if (error) {
+        track('profile not found', {
+            username: ctx.from.username,
+        })
         ctx.reply(messages.notFoundProfile());
         const timestamp = new Date().toLocaleString();
-        sendToAdmins(`🚨Не нашли пользователя ${ctx.from.username}, ${timestamp}`, bot)
+        await sendToAdmins(`🚨Не нашли пользователя ${ctx.from.username}, ${timestamp}`, bot)
     }
     if (user) {
+        track('profile found', {
+            username: ctx.from.username,
+        })
         await ctx.reply('✅ Нашел');
         if(user.is_updated){
-            await sendProfile(ctx, user)
+            await sendProfile(ctx)
             await ctx.scene.enter('requestScene');
         } else {
-            await sendProfile(ctx, user)
+            await sendProfile(ctx)
             await ctx.reply('Твой профиль? Дозаполнить и изменить можно будет дальше',Markup.inlineKeyboard(makeKeyboard(['Да, мой', 'Не мой'], 3, 'isRight'), {columns: 3}))
         }
     }
@@ -92,10 +102,16 @@ bot.action(/isRight_(.+)/, async (ctx) => {
     const optionName = ctx.match[1];
     await ctx.answerCbQuery(); // Required to close the loading state on the button
     if(optionName === 'Да, мой') {
+        track('profile recognized', {
+            username: ctx.from.username,
+        })
         await ctx.reply(`Супер, нужно заполнить еще несколько полей и твой профиль будет готов`);
         await wait(1000);
         await ctx.scene.enter('profileNormalize');
     } else {
+        track('profile not recognized', {
+            username: ctx.from.username,
+        })
         await ctx.reply(`Написал в поддержку, скоро тебе помогут`);
         const timestamp = new Date().toLocaleString();
         await sendToAdmins(`🚨Пользователь ${ctx.from.username} не признал свой профиль, ${timestamp}`, bot)
@@ -103,8 +119,9 @@ bot.action(/isRight_(.+)/, async (ctx) => {
 })
 
 bot.hears('👤 Профиль', async (ctx) => {
-    await ctx.reply('Ваш профиль')
-    await ctx.reply('Изменить')
+    await sendProfile(ctx)
+    await ctx.reply('Действия:', Markup.inlineKeyboard(makeKeyboard(['📝 Редактировать', '❌ Удалить'], 2, 'profileActions'), {columns: 2}))
+
 });
 bot.hears('👥 Пара этой недели', async (ctx) => {
     await ctx.reply('Ваша пара на этой неделе:')
@@ -118,6 +135,41 @@ bot.hears('⏸ Поставить на паузу', async (ctx) => {
     await ctx.reply('Вам не будут приходить оповещения до конца следующей недели')
 });
 
+bot.action(/profileActions_(.+)/, async (ctx) => {
+    const optionName = ctx.match[1];
+    await ctx.answerCbQuery(); // Required to close the loading state on the button
+    if(optionName === '📝 Редактировать') {
+        await ctx.reply(
+            'Что хотите поменять?',
+            Markup.inlineKeyboard(
+                makeKeyboard(
+                    ['Имя', "Фото", "Описание", "Запросы", "Суперсила", "Навыки", "Увлечения", "Отмена"],
+                    3, 'edit'),
+                {columns: 3}
+            )
+        );
+    }
+})
+
+const multyChoiceFields = ['skills', 'hobbies']
+bot.action(/editProfile_(.+)/, async (ctx) => {
+    const optionName = ctx.match[1];
+    if(!multyChoiceFields.includes(optionName)) {
+
+    }
+    await ctx.answerCbQuery(); // Required to close the loading state on the button
+    console.log(optionName)
+    if(optionName === '📝 Редактировать') {
+        await ctx.scene.enter('editScene');
+    }
+})
+
+bot.on('text', async (ctx) => {
+    track('text', {
+        username: ctx.from.username,
+        message: ctx.message.text
+    })
+});
 // bot.on('text', async (ctx) => {
 //     if(ctx.message.text === '/start') return
 //     if(ctx.message.text === 'edit'){

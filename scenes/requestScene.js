@@ -3,12 +3,8 @@ const {makeKeyboard} = require("../helpers/keyboard");
 const { WizardScene } = Scenes;
 const {supabase} = require("../supabase");
 const dayjs = require('dayjs');
-var weekOfYear = require('dayjs/plugin/weekOfYear')
-var weekday = require('dayjs/plugin/weekday')
 const {createKeyboard} = require("../helpers/makeRegularKeyboard");
-
-dayjs.extend(weekOfYear)
-dayjs.extend(weekday)
+const {track} = require("@amplitude/analytics-node");
 
 const doneMessage = `⭐️ Готово! Твой профиль и запрос опубликованы. Скоро подберем тебе пару.
 
@@ -25,6 +21,7 @@ const checkCorrectAnswer = (ctx, prefix, isText) => {
     }
     return false;
 }
+
 const saveRequestToDB = async (ctx) => {
     const answer = ctx.callbackQuery?.data.split('_')[1]
     const firstDayOfWeek = dayjs().startOf('week');
@@ -64,10 +61,11 @@ const saveRequestToDB = async (ctx) => {
 const requestScene = new WizardScene(
     'requestScene',
     async (ctx) => {
+        track('request scene enter', {
+            username: ctx.from.username,
+        })
         await ctx.reply(
-            `Хочешь встречаться онлайн или офлайн?
-            
-Если выберешь "офлайн" ботик постарается подобрать собеседника из твоего района, который тоже хочет встретиться оффлайн и пришлет рандомную пару, только если по каким-то причинам (на этой неделе такой формат не выбрал никто из твоего города, например, или выбравших нечетное количество) не получится.`,
+            `Как ты хочешь встречаться с участниками -- онлайн или офлайн на Бали?`,
             Markup.inlineKeyboard(
                 makeKeyboard(
                     ['Офлайн', "Онлайн"],
@@ -75,6 +73,9 @@ const requestScene = new WizardScene(
                 {columns: 3}
             )
         );
+        track('meeting format', {
+            username: ctx.from.username,
+        })
         return ctx.wizard.next();
     },
     async (ctx) => {
@@ -97,6 +98,9 @@ const requestScene = new WizardScene(
                 {columns: 6}
             )
         );
+        track('fun/use', {
+            username: ctx.from.username,
+        })
         return ctx.wizard.next();
     },
     async (ctx) => {
@@ -113,11 +117,14 @@ const requestScene = new WizardScene(
 
             return ctx.scene.leave()
         }
+        track('location', {
+            username: ctx.from.username,
+        })
         await ctx.reply(
-            'Где ты хочешь встретиться?',
+            'Выбери подходящие локации для встреч.',
             Markup.inlineKeyboard(
                 makeKeyboard(
-                    ['Чангу', "Семеньяк", "Букит", "Убуд"],
+                    ['Чангу (Семеньяк)', "Букит", "Убуд"],
                     2, 'location'),
                 {columns: 3}
             )
@@ -130,10 +137,12 @@ const requestScene = new WizardScene(
             await ctx.reply('Пожалуйста, выберите один из предложенных вариантов или нажмите "Отмена"');
             return ctx.wizard.selectStep(3);
         }
-
         await ctx.answerCbQuery();
         await saveRequestToDB(ctx);
         await ctx.reply(doneMessage, mainKeyboard);
+        track('request done', {
+            username: ctx.from.username,
+        })
         return ctx.scene.leave()
     }
 );
