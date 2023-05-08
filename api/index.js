@@ -25,15 +25,15 @@ cloudinary.config({
     api_secret: "p2Zvcv3kPZt0bLNpBbHhSNZXiac"
 });
 
-const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
+// const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
 const prodToken = '5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ'
-const bot = new Telegraf(devToken);
+const bot = new Telegraf(prodToken);
 
 const stage = new Scenes.Stage([editScene, requestScene, profileNormalizeScene]);
 bot.use(session());
 bot.use(stage.middleware());
 
-// bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
+bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
 
 module.exports = async (req, res) => {
     try {
@@ -205,5 +205,5 @@ bot.on('text', async (ctx) => {
 // })
 
 
-bot.launch();
+// bot.launch();
 // console.log('bot started');
