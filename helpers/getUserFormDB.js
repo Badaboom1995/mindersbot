@@ -19,7 +19,7 @@ const sendProfile = async (ctx) => {
     const data = await getUserFormDB(ctx.from.username);
     const user = data.user
     await ctx.replyWithPhoto(user.profile_photo_url || 'https://ibb.co/yS0fKL2', {
-        caption: `<b>${user.name ? user.name : 'Имя не указано'}</b>  | ${user.groups.split(',').map(group => `#${removePatternFromString(group, 'Я ')}`).join(' ')}
+        caption: `<b>${user.name ? user.name : 'Имя не указано'}</b>  | ${user.groups.split(',').map(group => `#${group.trim().split(' ').slice(1).join('')}`).join(' ')}
 ${user.description ? user.description : 'Описание не указано'}
 
 <b>😎️ Навыки</b>: ${user.skills ? getNames(user.skills, skillsDict) : messages.noSkills()}

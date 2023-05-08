@@ -25,15 +25,15 @@ cloudinary.config({
     api_secret: "p2Zvcv3kPZt0bLNpBbHhSNZXiac"
 });
 
-// const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
-const prodToken = '5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ'
-const bot = new Telegraf(prodToken);
+const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
+// const prodToken = '5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ'
+const bot = new Telegraf(devToken);
 
 const stage = new Scenes.Stage([editScene, requestScene, profileNormalizeScene]);
 bot.use(session());
 bot.use(stage.middleware());
 
-bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
+// bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
 
 module.exports = async (req, res) => {
     try {
@@ -90,7 +90,8 @@ bot.action(/sync(.+)/, async (ctx) => {
         await ctx.reply('✅ Нашел');
         if(user.is_updated){
             await sendProfile(ctx)
-            await ctx.scene.enter('requestScene');
+            await ctx.reply('Похоже ты уже прошел онбординг');
+            // await ctx.scene.enter('requestScene');
         } else {
             await sendProfile(ctx)
             await ctx.reply('Твой профиль? Дозаполнить и изменить можно будет дальше',Markup.inlineKeyboard(makeKeyboard(['Да, мой', 'Не мой'], 3, 'isRight'), {columns: 3}))
@@ -205,5 +206,5 @@ bot.on('text', async (ctx) => {
 // })
 
 
-// bot.launch();
+bot.launch();
 // console.log('bot started');

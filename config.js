@@ -80,5 +80,9 @@ const hobbiesDict = [
     {id: 'volunteering', name: 'Волонтерство'},
     {id: 'language', name: 'Языки'}
 ];
-
+const groupsDict = {
+    "Я основатель": "#основатель",
+    "Я инвестор": "investor",
+    "Я специалист": "professional",
+}
 module.exports = {messages, userDataDict, skillsDict, hobbiesDict}
