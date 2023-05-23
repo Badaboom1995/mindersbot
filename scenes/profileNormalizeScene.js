@@ -6,6 +6,7 @@ const {getMissingData} = require("../helpers/getMissingData");
 const {skillsDict, hobbiesDict} = require("../config");
 const {uploadImage} = require("../helpers/uploadImage");
 const {track} = require("@amplitude/analytics-node");
+const {sendProfile} = require("../helpers/getUserFormDB");
 
 // const checkCorrectAnswer = (ctx, prefix, isText) => {
 //     if(!ctx.callbackQuery) return false;
@@ -24,11 +25,29 @@ const dataDict = {
     description: 'Описание',
     requests: 'Запросы',
     superpower: 'Суперсила',
-    skills: 'Навыки',
-    hobbies: 'Увлечения',
-    groups: 'К какой группе относитесь',
+    // skills: 'Навыки',
+    // hobbies: 'Увлечения',
+    // groups: 'К какой группе относитесь',
 }
 
+const saveMultyToDB = async (ctx, answer) => {
+    let data
+    if(answer){
+        if(ctx.session.currentField === 'skills') {
+            data = ctx.session.skills.map(skill => skillsDict.find(item => item.name === skill).id).join(',')
+        }
+        if(ctx.session.currentField === 'hobbies') {
+            data = ctx.session.hobbies.map(hobby => hobbiesDict.find(item => item.name === hobby).id).join(',')
+        }
+    }
+    await supabase
+        .from('Users')
+        .update({ [ctx.session.currentField]: data })
+        .eq('telegram', ctx.session.user?.telegram);
+
+    await ctx.answerCbQuery();
+    ctx.session.missingData.shift();
+}
 const profileNormalizeScene = new WizardScene(
     'profileNormalize',
     async (ctx) => {
@@ -44,14 +63,12 @@ const profileNormalizeScene = new WizardScene(
                     data = ctx.session.hobbies.map(hobby => hobbiesDict.find(item => item.name === hobby).id).join(',')
                 }
             }
-
             await supabase
                 .from('Users')
                 .update({ [ctx.session.currentField]: data })
                 .eq('telegram', ctx.session.user?.telegram);
 
             await ctx.answerCbQuery();
-
             ctx.session.missingData.shift();
         }
         if(!ctx.session.missingData) {
@@ -59,13 +76,16 @@ const profileNormalizeScene = new WizardScene(
                 username: ctx.from.username,
             })
             ctx.session.missingData = getMissingData(ctx.session.user).filter(field => dataDict.hasOwnProperty(field));
-            if(!ctx.session.missingData.includes('hobbies')){ctx.session.missingData.push('hobbies')}
             if(!ctx.session.missingData.includes('skills')){ctx.session.missingData.push('skills')}
+            if(!ctx.session.missingData.includes('hobbies')){ctx.session.missingData.push('hobbies')}
             ctx.session.skills = [];
             ctx.session.hobbies = [];
+            ctx.session.hobbiesMessages = []
+            ctx.session.skillsMessages = []
         }
 
         ctx.session.currentField = ctx.session.missingData[0];
+
         if(!ctx.callbackQuery) {
             await ctx.reply(`Оставшиеся поля:
 - ${ctx.session.missingData.map(item => dataDict[item]).join("\n- ")}`);
@@ -89,7 +109,7 @@ const profileNormalizeScene = new WizardScene(
             case 'skills':
                 if(ctx.session.skills.length >= 5) {
                     await ctx.reply(`Выбрано максимальное количество`);
-                    ctx.session.missingData.shift();
+                    await saveMultyToDB(ctx, answer)
                     return ctx.scene.enter('profileNormalize');
                 }
                  if(answer && prefix === 'skills'){
@@ -98,12 +118,18 @@ const profileNormalizeScene = new WizardScene(
                          skill: answer,
                      })
                     await ctx.answerCbQuery();
-                    ctx.session.skills.push(answer);
-                    await ctx.reply(`✅ Добавил ${answer}`);
+                     if(ctx.session.skills.includes(answer)){
+                         await ctx.reply(`❌ Уже добавлено ${answer}`);
+                     } else {
+                         ctx.session.skills.push(answer);
+                         await ctx.reply(`✅ Добавил ${answer}`);
+                     }
                  }
+
                  else {
                      const skills = skillsDict.map(item => item.name)
-                     await ctx.reply('Выбери свои основные профессиональные навыки. Не более 5 вариантов.', Markup.inlineKeyboard(makeKeyboard(skills, 2, 'skills'), {columns: 3}));
+                     await ctx.reply('Выбери свои основные профессиональные навыки. Не более 5 вариантов.', Markup.inlineKeyboard(makeKeyboard(skills, 1, 'skills'), {columns: 3}));
+                     await ctx.reply('Выбери свои основные профессиональные навыки. Не более 5 вариантов.')
                      await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
                  }
                  return ctx.wizard.selectStep(0)
@@ -111,7 +137,11 @@ const profileNormalizeScene = new WizardScene(
             case 'hobbies':
                 if(ctx.session.hobbies.length >= 5) {
                     await ctx.reply(`Выбрано максимальное количество`);
-                    ctx.session.missingData.shift();
+                    await saveMultyToDB(ctx, answer)
+                    ctx.session.hobbiesMessages.forEach(msg => {
+                        ctx.telegram.deleteMessage(msg.chat.id, msg.message_id)
+                    })
+                    // ctx.telegram.deleteMessage(ctx.session.hobbiesMessage.chat.id, ctx.session.hobbiesMessage.message_id)
                     return ctx.scene.enter('profileNormalize');
                 }
                 if(answer && prefix === 'hobbies'){
@@ -120,13 +150,20 @@ const profileNormalizeScene = new WizardScene(
                         username: ctx.from.username,
                         skill: answer,
                     })
-                    ctx.session.hobbies.push(answer);
-                    await ctx.reply(`✅ Добавлено ${answer}`);
+                    if(ctx.session.hobbies.includes(answer)){
+                        await ctx.reply(`❌ Уже добавлено ${answer}`);
+                        // return ctx.scene.enter('profileNormalize');
+                    } else {
+                        ctx.session.hobbies.push(answer);
+                        await ctx.reply(`✅ Добавлено ${answer}`);
+                    }
                 }
                 else {
                     const hobbies = hobbiesDict.map(item => item.name)
-                    await ctx.reply('Выбери свои увлечения и хобби. Не более 5 вариантов.', Markup.inlineKeyboard(makeKeyboard(hobbies, 2, 'hobbies'), {columns: 3}));
-                    await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
+                    const msgOne = await ctx.reply('Выбери свои увлечения и хобби. Не более 5 вариантов.', Markup.inlineKeyboard(makeKeyboard(hobbies, 1, 'hobbies'), {columns: 3}));
+                    const msgTwo = await ctx.reply('Выбери свои увлечения и хобби. Не более 5 вариантов.')
+                    const msgThree = await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
+                    ctx.session.hobbiesMessages.push(msgOne, msgTwo, msgThree)
                 }
                 return ctx.wizard.selectStep(0)
                 break;
@@ -138,18 +175,25 @@ const profileNormalizeScene = new WizardScene(
                     .from('Users')
                     .update({ is_updated: true })
                     .eq('telegram', ctx.session.user.telegram);
-
+                await sendProfile(ctx)
+                // send inline keyboard
+                await ctx.reply('Профиль готов! Теперь давай заполним запрос на следующую неделю', Markup.inlineKeyboard(makeKeyboard(['Перейти к запросу'], 2, 'done'), {columns: 2}));
                 track('profile is ready', {
                     username: ctx.from.username,
                 })
-                return ctx.scene.enter('requestScene');
+                // return ctx.scene.enter('requestScene');
         }
         return ctx.wizard.next();
     },
 
+
     async (ctx) => {
         const answer = ctx.callbackQuery?.data.split('_')[1]
+        const prefix = ctx.callbackQuery?.data.split('_')[0]
         let data = ctx.message?.text
+        if(prefix === 'done') {
+            return ctx.scene.enter('requestScene');
+        }
         if(answer){
             if(ctx.session.currentField === 'skills') {
                 data = ctx.session.skills.map(skill => skillsDict.find(item => item.name === skill).id).join(',')

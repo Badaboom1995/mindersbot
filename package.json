@@ -20,6 +20,7 @@
     "nodemon": "^2.0.22",
     "openai": "^3.2.1",
     "pdf2json": "^3.0.3",
+    "pdfjs-dist": "^3.6.172",
     "puppeteer": "^19.11.1",
     "telegraf": "^4.12.2",
     "telegraph": "^0.8.22"

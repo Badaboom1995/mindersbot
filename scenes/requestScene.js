@@ -5,11 +5,27 @@ const {supabase} = require("../supabase");
 const dayjs = require('dayjs');
 const {createKeyboard} = require("../helpers/makeRegularKeyboard");
 const {track} = require("@amplitude/analytics-node");
+const {sendProfile} = require("../helpers/getUserFormDB");
+const {wait} = require("../helpers/wait");
 
-const doneMessage = `⭐️ Готово! Твой профиль и запрос опубликованы. Скоро подберем тебе пару.
+const mainKeyboard = createKeyboard({keys: ['👤 Профиль', '🤲 Поддержка'], rows:2})
+const sendDoneMessage = async (ctx) => {
+    await ctx.answerCbQuery();
+    await ctx.reply(`Получилось! 🙌
 
-Если захочешь изменить профиль или запрос - воспользуйся клавиатурой ниже. Там же ты можешь отменить свое участие на следующей неделе, поменять пару и тд.`
-const mainKeyboard = createKeyboard({keys: ['👤 Профиль', '🗣 Запрос', "⏸ Поставить на паузу", "👥 Пара этой недели"], rows:2})
+Теперь ты — участник встреч minders community ☕️
+
+Присоединяйся к нашим соц.сетям:
+💙 t.me/minders_channel
+📸 instagram.com/minders.community
+
+`, {
+        disable_web_page_preview: true,
+    }
+)
+    // await sendProfile(ctx, ctx.from.username)
+    ctx.reply(`В понедельник мы пришлем подобранного специально для тебя участника. Хороших встреч! ☕️`, mainKeyboard);
+}
 
 const checkCorrectAnswer = (ctx, prefix, isText) => {
     if(!ctx.callbackQuery) return false;
@@ -63,7 +79,7 @@ const requestScene = new WizardScene(
     'requestScene',
     /// STEP 0 --------------------
     async (ctx) => {
-        await ctx.reply('Теперь давай заполним твой запрос на следующую неделю.');
+        // await ctx.reply('Теперь давай заполним твой запрос на следующую неделю.');
         await ctx.replyWithPhoto('https://ibb.co/CwzxZ3F');
         await ctx.reply(
             `Некоторые люди приходят на встречи, чтобы найти партнёров для будущих проектов и завести полезные контакты, условно назовём это "пользой". А кто-то приходит для расширения кругозора, новых эмоций и открытия чего-то нового, назовём это "фан". Какое описание больше подходит тебе?
@@ -110,12 +126,11 @@ const requestScene = new WizardScene(
             await ctx.reply('Пожалуйста, выбери один из предложенных вариантов');
             return ctx.wizard.selectStep(1);
         }
-        await ctx.answerCbQuery();
         const answer = ctx.callbackQuery?.data.split('_')[1]
         ctx.session.format = answer
         if(answer === 'Онлайн') {
             await saveRequestToDB(ctx);
-            await ctx.reply(doneMessage);
+            await sendDoneMessage(ctx)
             track('request done', {
                 username: ctx.from.username,
             })
@@ -142,11 +157,13 @@ const requestScene = new WizardScene(
             await ctx.reply('Пожалуйста, выберите один из предложенных вариантов или нажмите "Отмена"');
             return ctx.wizard.selectStep(3);
         }
-        await ctx.answerCbQuery();
         const answer = ctx.callbackQuery?.data.split('_')[1]
         ctx.session.location = answer
         await saveRequestToDB(ctx);
-        await ctx.reply(doneMessage);
+        await sendDoneMessage(ctx)
+        // mainKeyboard
+
+
         track('request done', {
             username: ctx.from.username,
         })

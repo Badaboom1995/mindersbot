@@ -19,13 +19,14 @@ const weekday = require("dayjs/plugin/weekday");
 dayjs.extend(weekOfYear)
 dayjs.extend(weekday)
 
+
 cloudinary.config({
     cloud_name: "dgpgmk0w7",
     api_key: "928942683275635",
     api_secret: "p2Zvcv3kPZt0bLNpBbHhSNZXiac"
 });
 
-// const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
+const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
 const prodToken = '5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ'
 const bot = new Telegraf(prodToken);
 
@@ -88,14 +89,8 @@ bot.action(/sync(.+)/, async (ctx) => {
             username: ctx.from.username,
         })
         await ctx.reply('✅ Нашел');
-        if(user.is_updated){
-            await sendProfile(ctx)
-            await ctx.reply('Похоже ты уже прошел онбординг');
-            // await ctx.scene.enter('requestScene');
-        } else {
-            await sendProfile(ctx)
-            await ctx.reply('Твой профиль? Дозаполнить и изменить можно будет дальше',Markup.inlineKeyboard(makeKeyboard(['Да, мой', 'Не мой'], 3, 'isRight'), {columns: 3}))
-        }
+        await sendProfile(ctx)
+        await ctx.reply('Твой профиль? Дозаполнить и изменить можно будет дальше',Markup.inlineKeyboard(makeKeyboard(['Да, мой', 'Не мой'], 3, 'isRight'), {columns: 3}))
     }
 })
 
@@ -121,8 +116,11 @@ bot.action(/isRight_(.+)/, async (ctx) => {
 
 bot.hears('👤 Профиль', async (ctx) => {
     await sendProfile(ctx)
-    await ctx.reply('Действия:', Markup.inlineKeyboard(makeKeyboard(['📝 Редактировать', '❌ Удалить'], 2, 'profileActions'), {columns: 2}))
+    await ctx.reply('Действия:', Markup.inlineKeyboard(makeKeyboard(['📝 Редактировать'], 2, 'profileActions'), {columns: 2}))
 
+});
+bot.hears('🤲 Поддержка', async (ctx) => {
+    await ctx.reply('Если что-то пошло не так напиши @badavoo или @ivan_tyumenyev в личку. Мы обязательно поможем')
 });
 bot.hears('👥 Пара этой недели', async (ctx) => {
     await ctx.reply('Ваша пара на этой неделе:')
@@ -140,15 +138,16 @@ bot.action(/profileActions_(.+)/, async (ctx) => {
     const optionName = ctx.match[1];
     await ctx.answerCbQuery(); // Required to close the loading state on the button
     if(optionName === '📝 Редактировать') {
-        await ctx.reply(
-            'Что хотите поменять?',
-            Markup.inlineKeyboard(
-                makeKeyboard(
-                    ['Имя', "Фото", "Описание", "Запросы", "Суперсила", "Навыки", "Увлечения", "Отмена"],
-                    3, 'edit'),
-                {columns: 3}
-            )
-        );
+        // await ctx.reply(
+        //     'Что хотите поменять?',
+        //     Markup.inlineKeyboard(
+        //         makeKeyboard(
+        //             ['Имя', "Фото", "Описание", "Суперсила", "Отмена"],
+        //             3, 'edit'),
+        //         {columns: 3}
+        //     )
+        // );
+        await ctx.scene.enter('editScene');
     }
 })
 
