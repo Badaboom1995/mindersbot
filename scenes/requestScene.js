@@ -46,6 +46,7 @@ const saveRequestToDB = async (ctx) => {
         .from('Requests')
         .select('*')
         .gt('created_at', firstDayOfWeek)
+        .eq('telegram', ctx.from.username)
         .single()
 
     await supabase
@@ -92,9 +93,7 @@ const requestScene = new WizardScene(
                 {columns: 6}
             )
         );
-        track('fun/use', {
-            username: ctx.from.username,
-        })
+        track('fun/use', undefined, {user_id: ctx.from.username})
         return ctx.wizard.next();
     },
     /// STEP 1 --------------------
@@ -115,9 +114,7 @@ const requestScene = new WizardScene(
                 {columns: 3}
             )
         );
-        track('meeting format filled', {
-            username: ctx.from.username,
-        })
+        track('meeting format filled', undefined, {user_id: ctx.from.username})
         return ctx.wizard.next();
     },
     /// STEP 2 --------------------
@@ -131,9 +128,7 @@ const requestScene = new WizardScene(
         if(answer === 'Онлайн') {
             await saveRequestToDB(ctx);
             await sendDoneMessage(ctx)
-            track('request done', {
-                username: ctx.from.username,
-            })
+            track('request done', undefined, {user_id: ctx.from.username})
             return ctx.scene.leave()
         }
         await ctx.reply(
@@ -145,9 +140,7 @@ const requestScene = new WizardScene(
                 {columns: 3}
             )
         );
-        track('location', {
-            username: ctx.from.username,
-        })
+        track('location filled', undefined, {user_id: ctx.from.username})
         return ctx.wizard.next();
     },
     /// STEP 3 FINAL --------------------
@@ -162,11 +155,7 @@ const requestScene = new WizardScene(
         await saveRequestToDB(ctx);
         await sendDoneMessage(ctx)
         // mainKeyboard
-
-
-        track('request done', {
-            username: ctx.from.username,
-        })
+        track('request done', undefined, {user_id: ctx.from.username})
         return ctx.scene.leave()
     }
 );

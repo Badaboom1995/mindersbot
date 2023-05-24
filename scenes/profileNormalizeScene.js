@@ -72,9 +72,7 @@ const profileNormalizeScene = new WizardScene(
             ctx.session.missingData.shift();
         }
         if(!ctx.session.missingData) {
-            track('normalize scene entered', {
-                username: ctx.from.username,
-            })
+            track('normalize scene entered', undefined, {user_id: ctx.from.username})
             ctx.session.missingData = getMissingData(ctx.session.user).filter(field => dataDict.hasOwnProperty(field));
             if(!ctx.session.missingData.includes('skills')){ctx.session.missingData.push('skills')}
             if(!ctx.session.missingData.includes('hobbies')){ctx.session.missingData.push('hobbies')}
@@ -113,10 +111,7 @@ const profileNormalizeScene = new WizardScene(
                     return ctx.scene.enter('profileNormalize');
                 }
                  if(answer && prefix === 'skills'){
-                     track('skill added', {
-                         username: ctx.from.username,
-                         skill: answer,
-                     })
+                     track('skill added', {skill:answer}, {user_id: ctx.from.username})
                     await ctx.answerCbQuery();
                      if(ctx.session.skills.includes(answer)){
                          await ctx.reply(`❌ Уже добавлено ${answer}`);
@@ -146,10 +141,7 @@ const profileNormalizeScene = new WizardScene(
                 }
                 if(answer && prefix === 'hobbies'){
                     await ctx.answerCbQuery();
-                    track('hobby added', {
-                        username: ctx.from.username,
-                        skill: answer,
-                    })
+                    track('hobby added', {hobby:answer}, {user_id: ctx.from.username})
                     if(ctx.session.hobbies.includes(answer)){
                         await ctx.reply(`❌ Уже добавлено ${answer}`);
                         // return ctx.scene.enter('profileNormalize');
@@ -178,9 +170,7 @@ const profileNormalizeScene = new WizardScene(
                 await sendProfile(ctx)
                 // send inline keyboard
                 await ctx.reply('Профиль готов! Теперь давай заполним запрос на следующую неделю', Markup.inlineKeyboard(makeKeyboard(['Перейти к запросу'], 2, 'done'), {columns: 2}));
-                track('profile is ready', {
-                    username: ctx.from.username,
-                })
+                track('profile is ready', undefined, {user_id: ctx.from.username})
                 // return ctx.scene.enter('requestScene');
         }
         return ctx.wizard.next();
@@ -209,9 +199,7 @@ const profileNormalizeScene = new WizardScene(
                 data = cdnURL
             } else {
                 await ctx.reply('Пришли фото через вложение, пожалуйста');
-                track('sent photo as text', {
-                    username: ctx.from.username,
-                })
+                track('sent photo as text', undefined, {user_id: ctx.from.username})
                 return ctx.scene.enter('profileNormalize');
             }
         }
@@ -224,17 +212,12 @@ const profileNormalizeScene = new WizardScene(
 
         if(error) {
             await ctx.reply('❌ Ошибка');
-            console.log('qweqwewqe')
-            track('profile normalize save error', {
-                username: ctx.from.username,
-            })
+            track('profile normalize save error', undefined, {user_id: ctx.from.username})
             return ctx.scene.enter('profileNormalize');
 
         } else {
             await ctx.reply('✅ Сохранил');
-            track('profile normalize saved prop', {
-                username: ctx.from.username,
-            })
+            track('profile normalize saved prop', undefined, {user_id: ctx.from.username})
             ctx.session.missingData.shift();
             return ctx.scene.enter('profileNormalize');
         }

@@ -9,6 +9,7 @@ const {sendToAdmins} = require("../helpers/sendToAdmins");
 const {supabase} = require("../supabase");
 const {wait} = require("../helpers/wait");
 const cloudinary = require('cloudinary').v2;
+
 const { init, track } = require('@amplitude/analytics-node');
 
 init('fc185899af59f00b16d189f6bae75ad');
@@ -28,13 +29,13 @@ cloudinary.config({
 
 const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
 const prodToken = '5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ'
-const bot = new Telegraf(prodToken);
+const bot = new Telegraf(devToken);
 
 const stage = new Scenes.Stage([editScene, requestScene, profileNormalizeScene]);
 bot.use(session());
 bot.use(stage.middleware());
 
-bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
+// bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
 
 module.exports = async (req, res) => {
     try {
@@ -59,17 +60,22 @@ const saveChatId = async (ctx) => {
 }
 
 bot.start(async (ctx) => {
-    track('bot start', {
-        username: ctx.from.username,
-    })
+    track('start', undefined, {
+        user_id: ctx.from.username,
+    });
+
+    // track('bot start', {
+    //     user_id: ctx.from.username,
+    //     username: ctx.from.username,
+    // })
     saveChatId(ctx);
     ctx.session = {};
     await ctx.reply(messages.welcome(ctx.from.first_name), Markup.inlineKeyboard(makeKeyboard(['Поехали 🚀'], 3, 'sync'), {columns: 3}));
 });
 
 bot.action(/sync(.+)/, async (ctx) => {
-    track('sync button pushed', {
-        username: ctx.from.username,
+    track('sync button pushed',undefined, {
+        user_id: ctx.from.username,
     })
     const username =  ctx.from.username;
     const {user, error} = await getUserFormDB(username);
@@ -77,16 +83,16 @@ bot.action(/sync(.+)/, async (ctx) => {
 
     ctx.session.user = user;
     if (error) {
-        track('profile not found', {
-            username: ctx.from.username,
+        track('profile not found',undefined, {
+            user_id: ctx.from.username,
         })
         ctx.reply(messages.notFoundProfile());
         const timestamp = new Date().toLocaleString();
         await sendToAdmins(`🚨Не нашли пользователя ${ctx.from.username}, ${timestamp}`, bot)
     }
     if (user) {
-        track('profile found', {
-            username: ctx.from.username,
+        track('profile found',undefined, {
+            user_id: ctx.from.username,
         })
         await ctx.reply('✅ Нашел');
         await sendProfile(ctx)
@@ -98,15 +104,15 @@ bot.action(/isRight_(.+)/, async (ctx) => {
     const optionName = ctx.match[1];
     await ctx.answerCbQuery(); // Required to close the loading state on the button
     if(optionName === 'Да, мой') {
-        track('profile recognized', {
-            username: ctx.from.username,
+        track('profile recognized',undefined, {
+            user_id: ctx.from.username,
         })
         await ctx.reply(`Супер, нужно заполнить недостающие поля`);
         await wait(1000);
         await ctx.scene.enter('profileNormalize');
     } else {
-        track('profile not recognized', {
-            username: ctx.from.username,
+        track('profile not recognized',undefined, {
+            user_id: ctx.from.username,
         })
         await ctx.reply(`Написал в поддержку, скоро тебе помогут`);
         const timestamp = new Date().toLocaleString();
@@ -165,10 +171,9 @@ bot.action(/editProfile_(.+)/, async (ctx) => {
 })
 
 bot.on('text', async (ctx) => {
-    track('text', {
-        username: ctx.from.username,
-        message: ctx.message.text
-    })
+    track('text',
+        {text: ctx.message.text},
+        {user_id: ctx.from.username})
 });
 // bot.on('text', async (ctx) => {
 //     if(ctx.message.text === '/start') return
@@ -205,5 +210,5 @@ bot.on('text', async (ctx) => {
 // })
 
 
-// bot.launch();
+bot.launch();
 // console.log('bot started');
