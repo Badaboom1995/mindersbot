@@ -108,6 +108,9 @@ const profileNormalizeScene = new WizardScene(
                 if(ctx.session.skills.length >= 5) {
                     await ctx.reply(`Выбрано максимальное количество`);
                     await saveMultyToDB(ctx, answer)
+                    ctx.session.skillsMessages.forEach(msg => {
+                        ctx.telegram.deleteMessage(msg.chat.id, msg.message_id)
+                    })
                     return ctx.scene.enter('profileNormalize');
                 }
                  if(answer && prefix === 'skills'){
@@ -123,9 +126,10 @@ const profileNormalizeScene = new WizardScene(
 
                  else {
                      const skills = skillsDict.map(item => item.name)
-                     await ctx.reply('Выбери свои основные профессиональные навыки. Не более 5 вариантов.', Markup.inlineKeyboard(makeKeyboard(skills, 1, 'skills'), {columns: 3}));
-                     await ctx.reply('Выбери свои основные профессиональные навыки. Не более 5 вариантов.')
-                     await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
+                     const msgOne = await ctx.reply('Выбери свои основные профессиональные навыки. Не более 5 вариантов.', Markup.inlineKeyboard(makeKeyboard(skills, 1, 'skills'), {columns: 3}));
+                     const msgTwo = await ctx.reply('Выбери свои основные профессиональные навыки. Не более 5 вариантов.')
+                     const msgThree = await ctx.reply('Нажми "Готово" когда закончишь', Markup.inlineKeyboard(makeKeyboard(['💾 Готово'], 3, 'done'), {columns: 3}));
+                     ctx.session.skillsMessages.push(msgOne, msgTwo, msgThree)
                  }
                  return ctx.wizard.selectStep(0)
                 break;
