@@ -85,8 +85,8 @@ const profileNormalizeScene = new WizardScene(
         ctx.session.currentField = ctx.session.missingData[0];
 
         if(!ctx.callbackQuery) {
-            await ctx.reply(`Оставшиеся поля:
-- ${ctx.session.missingData.map(item => dataDict[item]).join("\n- ")}`);
+//             await ctx.reply(`Оставшиеся поля:
+// - ${ctx.session.missingData.map(item => dataDict[item]).join("\n- ")}`);
         }
         switch (ctx.session.currentField) {
             case 'name':
