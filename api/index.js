@@ -35,7 +35,7 @@ const stage = new Scenes.Stage([editScene, requestScene, profileNormalizeScene])
 bot.use(session());
 bot.use(stage.middleware());
 
-// bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
+bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
 
 module.exports = async (req, res) => {
     try {
@@ -216,5 +216,5 @@ bot.on('text', async (ctx) => {
 // AMPLITUDE_API_KEY = 'fc185899af59f00b16d189f6bae75ad'
 // NODE_ENV = 'development'
 
-bot.launch();
+// bot.launch();
 // console.log('bot started');
