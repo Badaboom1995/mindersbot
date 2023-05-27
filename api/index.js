@@ -9,10 +9,11 @@ const {sendToAdmins} = require("../helpers/sendToAdmins");
 const {supabase} = require("../supabase");
 const {wait} = require("../helpers/wait");
 const cloudinary = require('cloudinary').v2;
+require('dotenv').config();
 
 const { init, track } = require('@amplitude/analytics-node');
 
-init('fc185899af59f00b16d189f6bae75ad');
+init("fc185899af59f00b16d189f6bae75ad");
 
 const dayjs = require('dayjs');
 const weekOfYear = require("dayjs/plugin/weekOfYear");
@@ -27,8 +28,10 @@ cloudinary.config({
     api_secret: "p2Zvcv3kPZt0bLNpBbHhSNZXiac"
 });
 
-const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
+// const devToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
 const prodToken = '5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ'
+// console.log(process.env.NODE_ENV)
+// const bot = new Telegraf(process.env.NODE_ENV === 'development' ? process.env.TOKEN_DEV : process.env.TOKEN_PROD);
 const bot = new Telegraf(prodToken);
 
 const stage = new Scenes.Stage([editScene, requestScene, profileNormalizeScene]);
@@ -36,6 +39,9 @@ bot.use(session());
 bot.use(stage.middleware());
 
 bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
+// if(process.env.NODE_ENV === 'production') {
+//     bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
+// }
 
 module.exports = async (req, res) => {
     try {
@@ -175,6 +181,7 @@ bot.on('text', async (ctx) => {
         {text: ctx.message.text},
         {user_id: ctx.from.username})
 });
+
 // bot.on('text', async (ctx) => {
 //     if(ctx.message.text === '/start') return
 //     if(ctx.message.text === 'edit'){
@@ -209,6 +216,9 @@ bot.on('text', async (ctx) => {
 //     await ctx.replyWithHTML(`<b>${optionName}</b> skill has been added to your profile`);
 // })
 
+// if(process.env.NODE_ENV === 'development') {
+//     console.log('dev bot started');
+//     bot.launch();
+// }
 
-// bot.launch();
-// console.log('bot started');
+
