@@ -116,7 +116,7 @@ const editScene = new WizardScene(
             }
         }
         // save data to DB
-        const userNickname = ctx.message.from.username;
+        const userNickname = ctx.from.username;
         const { error } = await supabase
             .from('Users')
             .update({ [fieldName]: data })

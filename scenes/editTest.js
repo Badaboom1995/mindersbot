@@ -1,6 +1,6 @@
 const {Markup, Scenes} = require("telegraf");
 const {makeKeyboard} = require("../helpers/keyboard");
-const { WizardScene} = Scenes;
+const {WizardScene} = Scenes;
 const {supabase} = require("../supabase");
 const {getMissingData} = require("../helpers/getMissingData");
 const {skillsDict, hobbiesDict} = require("../config");
@@ -28,7 +28,6 @@ const dataDict = {
     hobbies: 'Увлечения',
     groups: 'К какой группе относитесь',
 }
-
 
 // Step 0
 // if no current field show main menu
@@ -65,9 +64,7 @@ const profileNormalizeScene = new WizardScene(
                 )
             );
             // save to DB
-
         }
-
 
         if(prefix === 'done'){}
     },
@@ -101,7 +98,7 @@ const profileNormalizeScene = new WizardScene(
         const { error } = await supabase
             .from('Users')
             .update({ [ctx.session.currentField]: data })
-            .eq('telegram', ctx.session.user.telegram);
+            .eq('telegram', ctx.from.username);
 
         if(error) {
             await ctx.reply('❌ Ошибка');

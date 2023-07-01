@@ -25,7 +25,7 @@ const userDataDict = {
     hobbies: 'Увлечения',
     groups: 'К какой группе относитесь',
 }
-
+const groupsDict = ['Я инвестор', 'Я основатель', 'Я специалист', 'Я творческая личность']
 const skillsDict = [
     {id: 'analytics', name: '📊 Аналитика'},
     {id: 'blockchain', name: '🔗 Блокчейн'},
@@ -92,4 +92,4 @@ const hobbiesDict = [
     // {id: 'snowboard', name: '🏂️ Сноуборд'},
 ];
 
-module.exports = {messages, userDataDict, skillsDict, hobbiesDict}
+module.exports = {messages, userDataDict, skillsDict, hobbiesDict, groupsDict}
