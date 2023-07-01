@@ -9,7 +9,9 @@ const {sendToAdmins} = require("../helpers/sendToAdmins");
 const {supabase} = require("../supabase");
 const {wait} = require("../helpers/wait");
 const cloudinary = require('cloudinary').v2;
+const express = require('express');
 
+const app = express();
 const { init, track } = require('@amplitude/analytics-node');
 
 init('fc185899af59f00b16d189f6bae75ad');
@@ -204,7 +206,7 @@ bot.on('text', async (ctx) => {
 });
 
 bot.launch();
-
+app.listen(process.env.PORT || 5000)
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
