@@ -34,8 +34,6 @@ const stage = new Scenes.Stage([editScene, requestScene, profileNormalizeScene])
 bot.use(session());
 bot.use(stage.middleware());
 
-bot.telegram.setWebhook('https://minders-match.vercel.app/api/index');
-
 module.exports = async (req, res) => {
     try {
         await bot.handleUpdate(req.body);
