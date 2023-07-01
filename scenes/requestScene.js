@@ -23,7 +23,7 @@ const sendDoneMessage = async (ctx) => {
         disable_web_page_preview: true,
     }
 )
-    // await sendProfile(ctx, ctx.from.username)
+    await ctx.replyWithPhoto('https://res.cloudinary.com/dgpgmk0w7/image/upload/v1688229482/static/beforeMeenting_oalwna.png')
     ctx.reply(`В понедельник мы пришлем подобранного специально для тебя участника. Хороших встреч! ☕️`, mainKeyboard);
 }
 

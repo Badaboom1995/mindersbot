@@ -2,22 +2,11 @@ const {Markup, Scenes} = require("telegraf");
 const {makeKeyboard} = require("../helpers/keyboard");
 const { WizardScene} = Scenes;
 const {supabase} = require("../supabase");
-const {getMissingData} = require("../helpers/getMissingData");
+// const {getMissingData} = require("../helpers/getMissingData");
 const {skillsDict, hobbiesDict, groupsDict} = require("../config");
 const {uploadImage} = require("../helpers/uploadImage");
 const {track} = require("@amplitude/analytics-node");
 const {sendProfile} = require("../helpers/getUserFormDB");
-
-// const checkCorrectAnswer = (ctx, prefix, isText) => {
-//     if(!ctx.callbackQuery) return false;
-//     const {data} = ctx.callbackQuery;
-//     const [answer_prefix, answer] = data.split('_');
-//     if (answer_prefix === prefix) {
-//         ctx.wizard.state.editField = answer;
-//         return true;
-//     }
-//     return false;
-// }
 
 const dataDict = {
     groups: 'К какой группе относитесь',
@@ -79,10 +68,12 @@ const profileNormalizeScene = new WizardScene(
         if(!ctx.session.missingData) {
             track('normalize scene entered', undefined, {user_id: ctx.from.username})
             // ctx.session.missingData = getMissingData(ctx.session.user).filter(field => dataDict.hasOwnProperty(field));
-            const missingData = getMissingData(ctx.session.user)
+            // const missingData = getMissingData(ctx.session.user)
+            const missingData = ['name', 'profile_photo_url', 'description', 'requests', 'superpower', 'skills', 'hobbies', 'groups']
             ctx.session.missingData = Object.keys(dataDict).reduce((acc, key) => missingData.includes(key) ? [...acc, key] : acc, [])
             if(!ctx.session.missingData.includes('skills')){ctx.session.missingData.push('skills')}
             if(!ctx.session.missingData.includes('hobbies')){ctx.session.missingData.push('hobbies')}
+
             ctx.session.skills = [];
             ctx.session.hobbies = [];
             ctx.session.groups = [];
@@ -106,6 +97,7 @@ const profileNormalizeScene = new WizardScene(
                 break;
             case 'description':
                  await ctx.reply('Расскажи немного о своем профессиональном опыте. Нескольких предложений будет достаточно.');
+                await ctx.replyWithPhoto('https://res.cloudinary.com/dgpgmk0w7/image/upload/v1688229482/static/descriptionExample_nodivu.png')
                 break;
             case 'requests':
                  await ctx.reply('Какие у тебя запросы к сообществу? Что ожидаешь от него получить?');
