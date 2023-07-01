@@ -5,7 +5,12 @@
   "main": "api/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
     "start": "node api/index.js"
+  },
+  "engines": {
+    "node": "18.12.1",
+    "npm": "8.19.2"
   },
   "keywords": [],
   "author": "",
