@@ -51,19 +51,33 @@ try {
         }
     };
 
-    const updatePairInSupabase = async (user, impression) => {
-        const { data, error } = await supabase
-            .from('Pairs')
-            .select('*')
-            .or(`user.eq.${user}, partner.eq.${user}`)
-            .single()
+    const updatePairInSupabase = async (user, impression, pairDate) => {
+        const dayStart = dayjs(pairDate).format()
+        const dayEnd = dayjs(pairDate).add(1,'day').format()
+        try {
+            const { data, error } = await supabase
+                .from('Pairs')
+                .select('*')
+                .or(`user.eq.${user}, partner.eq.${user}`)
+                .gt('Created', dayStart)
+                .lt('Created', dayEnd)
+                .single()
 
-        const fieldName = data.user === user ? 'impression_user' : 'impression_partner'
-        await supabase
-            .from('Pairs')
-            .update({ [fieldName]: impression })
-            .eq('id', data.id)
-            .single()
+            if(error) {
+                console.log(error)
+                return
+            }
+            console.log(data)
+            const fieldName = data.user === user ? 'impression_user' : 'impression_partner'
+            await supabase
+                .from('Pairs')
+                .update({ [fieldName]: impression })
+                .eq('id', data.id)
+                .single()
+
+        } catch(e) {
+            console.log(e)
+        }
     }
 
     const saveChatId = async (ctx) => {
@@ -129,32 +143,39 @@ try {
         }
     })
 
-    bot.action(/get_review(.+)/, async (ctx) => {
-        const answer = ctx.match[1]
+    bot.action(/get_review\/([^/]+)/, async (ctx) => {
+        const response = ctx.match[1]
+        const answer = response.split('_')[1]
+        const date = response.split('_')[0]
+        const pairDate = dayjs(date).subtract(1, 'day').startOf('week').add(1, 'day')
         await ctx.answerCbQuery();
-        if(answer === '_Да, встретились!') {
-            ctx.reply('Как прошла встреча?', Markup.inlineKeyboard(makeKeyboard(['Отлично', 'Нормально', 'Ну такое'], 3, 'meet_quality'), {columns: 3}))
+        if(answer === 'Да, встретились!') {
+            ctx.reply('Как прошла встреча?', Markup.inlineKeyboard(makeKeyboard(['Отлично', 'Нормально', 'Ну такое'], 3, `meet_quality/${pairDate.format('YYYY-MM-DD')}`), {columns: 3}))
         }
-        if(answer === '_Нет, встретимся позже') {
-            await updatePairInSupabase(ctx.from.username, 'later')
+        if(answer === 'Нет, встретимся позже') {
+            await updatePairInSupabase(ctx.from.username, 'later', pairDate)
             await ctx.reply(`Окей, записал`);
         }
-        if(answer === '_Не договорились') {
-            await updatePairInSupabase(ctx.from.username, 'not_met')
+        if(answer === 'Не договорились') {
+
+            await updatePairInSupabase(ctx.from.username, 'not_met', pairDate)
             await ctx.reply(`Окей, записал`);
         }
     })
 
-    bot.action(/meet_quality(.+)/, async (ctx) => {
-        const answer = ctx.match[1]
-        if(answer === '_Отлично'){
-            await updatePairInSupabase(ctx.from.username, 'great')
+    bot.action(/meet_quality\/([^/]+)/, async (ctx) => {
+        const response = ctx.match[1]
+        const answer = response.split('_')[1]
+        const date = response.split('_')[0]
+        const pairDate = dayjs(date)
+        if(answer === 'Отлично'){
+            await updatePairInSupabase(ctx.from.username, 'great', pairDate)
         }
-        if(answer === '_Нормально'){
-            await updatePairInSupabase(ctx.from.username, 'ok')
+        if(answer === 'Нормально'){
+            await updatePairInSupabase(ctx.from.username, 'ok', pairDate)
         }
-        if(answer === '_Ну такое'){
-            await updatePairInSupabase(ctx.from.username, 'bad')
+        if(answer === 'Ну такое'){
+            await updatePairInSupabase(ctx.from.username, 'bad', pairDate)
         }
         await ctx.answerCbQuery();
         await ctx.reply(`Окей, записал`);

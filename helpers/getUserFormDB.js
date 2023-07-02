@@ -5,6 +5,8 @@ const {removePatternFromString} = require("./removePatternFromString");
 // const {bot} = require("../api");
 const {makeKeyboard} = require("./keyboard");
 
+const devToken = '5810362749:AAG1ht-EidhSqJ51mVutEpA8GGHtFvc1j0g'
+const stageToken = '6130195892:AAFB22x7qbo0wICcuSXffFHSyflc4tYm0b4'
 const prodToken = '5888882359:AAGcta__XatJMomOeSNIzTvQ9k5y7ejP8jQ'
 const bot = new Telegraf(prodToken);
 
